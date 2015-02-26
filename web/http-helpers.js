@@ -15,13 +15,13 @@ var fileExtensions = {
   '.js': 'text/javascript'
 };
 
-exports.serveAssets = function(res, asset, callback) {
+exports.serveAssets = function(res, dir, asset, callback) {
   if (asset === '/') {
     asset = asset + 'index.html';
   }
   var encoding = fileExtensions[path.extname(asset)];
   var func = callback;
-  var html = fs.readFile(__dirname+'/'+'public' + asset, 'utf-8', function (err, string) {
+  var html = fs.readFile(__dirname + dir + asset, 'utf-8', function (err, string) {
     func(string, encoding);
   });
 };
