@@ -29,6 +29,7 @@ exports.readListOfUrls = function(callback){
   fs.readFile(exports.paths['list'], 'utf-8', function(err, data) {
     if (err) throw err;
     fs.writeFile(exports.paths['list'], "");
+    data = data.split('\n');
     callback(data);
   });
 };

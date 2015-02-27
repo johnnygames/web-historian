@@ -4,7 +4,6 @@ var archive = require('../helpers/archive-helpers');
 
 var doWork = function () {
   archive.readListOfUrls(function (data) {
-    data = data.split('\n');
     archive.downloadUrls(data);
   });
 }

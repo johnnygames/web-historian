@@ -64,7 +64,7 @@ exports.handleRequest = function (req, res) {
   if( action ){
     action(req, res);
   } else {
-    httpHelper.sendResponse(res, "Not Found", 404);
+    httpHelper.send404(res);
   }
 };
 
