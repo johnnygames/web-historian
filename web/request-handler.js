@@ -10,38 +10,54 @@ var collectData = function(request, callback){
     data += chunk;
   });
   request.on('end', function(){
-    callback(data['filename']);
+    data = data.split('=')[1];
+    callback(data);
   });
 };
-var callbackHelper = function (res, dir, url) {
+
+var callbackHelper = function (res, dir, url, statusCode) {
   httpHelper.serveAssets(res, dir , url, function (string, encoding) {
-    httpHelper.sendResponse(res, string, 200, encoding);
+    httpHelper.sendResponse(res, string, statusCode, encoding);
   });
 };
+
 var actions = {
   'GET': function(req, res){
-    httpHelper.serveAssets(res, '/public' ,req.url, function (string, encoding) {
-      httpHelper.sendResponse(res, string, 200, encoding);
-    });
+    var dir;
+    if (req.url === '/') {
+      req.url = req.url + 'index.html';
+    }
+    fs.exists(archive.paths['siteAssets'] + req.url, function (exists) {
+      if (exists) {
+        dir = archive.paths['siteAssets'];
+      } else {
+        dir = archive.paths['archivedSites'];
+      };
+      httpHelper.serveAssets(res, dir , req.url, function (string, encoding) {
+        httpHelper.sendResponse(res, string, 200, encoding);
+      });
+    })
   },
   'POST': function(req, res){
     collectData(req, function(data) {
-      if (fs.exists('./archives/site/' + data)) {
-        httpHelper.serveAssets(res, './archives/site', '/'+ data, function(string, encoding) {
-          httpHelper.sendResponse(res, string, 201, encoding);
-        });
-      } else {
-        httpHelper.serveAssets(res, '/public', '/loading.html', function(string, encoding) {
-          httpHelper.sendResponse(res, string, 201, encoding);
-        });
-      }
-    });
-    // httpHelper.sendResponse(res, 'something', 201);
+      archive.isURLArchived(data, function(){
+        exports.sendRedirect(res, '/' + data, 302)
+      }, function(){
+        archive.addUrlToList(data);
+        exports.sendRedirect(res, '/loading.html', 302);
+      });
+    })
   },
   'OPTIONS': function(req, res){
     httpHelper.sendResponse('herro OPTIONS');
   }
 };
+
+exports.sendRedirect = function (res, location, statusCode) {
+  res.writeHead(statusCode, {Location: location});
+  res.end();
+};
+
 
 exports.handleRequest = function (req, res) {
   var action = actions[req.method];

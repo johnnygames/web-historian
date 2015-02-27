@@ -15,14 +15,19 @@ var fileExtensions = {
   '.js': 'text/javascript'
 };
 
+exports.send404 = function(res) {
+  exports.sendResponse(res, '', 404, 'text/html');
+};
+
 exports.serveAssets = function(res, dir, asset, callback) {
-  if (asset === '/') {
-    asset = asset + 'index.html';
-  }
   var encoding = fileExtensions[path.extname(asset)];
   var func = callback;
-  var html = fs.readFile(__dirname + dir + asset, 'utf-8', function (err, string) {
-    func(string, encoding);
+  var html = fs.readFile(dir + asset, 'utf-8', function (err, string) {
+    if (err) {
+      exports.send404(res);
+    } else {
+      func(string, encoding);
+    }
   });
 };
 

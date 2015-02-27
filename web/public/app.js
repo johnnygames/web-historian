@@ -5,7 +5,7 @@ $(function () {
     $.ajax({
       url: 'http://127.0.0.1:8080/',
       type: 'POST',
-      data: {'filename': filename},
+      data: {'url': filename},
       contentType: 'text'
     });
   });
